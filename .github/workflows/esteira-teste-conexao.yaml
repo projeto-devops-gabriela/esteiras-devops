@@ -14,7 +14,7 @@ on:
         type: string
 
 jobs:
-  build-and-publish:
+  build-and-test:
     runs-on: windows-latest
     steps:
       # Checkout the code
@@ -88,5 +88,36 @@ jobs:
           nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
           nuget.exe push **/*.nupkg -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload build artifacts for CD
+      - name: Upload build artifacts
+        if: ${{ inputs.project-type == 'WindowsFormsApp' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: ${{ inputs.proj-directory }}/bin/Release/
+
+  publish:
+    if: ${{ inputs.project-type == 'WindowsFormsApp' }}
+    runs-on: windows-latest
+    needs: build-and-test
+    steps:
+      # Download the build artifacts
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: build
+
+      # Deploy for github releases
+      - name: Deploy to GitHub Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v1.0.0
+          files: build/**/*.exe
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
