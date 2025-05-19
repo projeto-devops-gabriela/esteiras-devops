@@ -79,7 +79,7 @@ jobs:
       # Pack the NuGet package
       - name: Pack NuGet package
         if: ${{ inputs.project-type == 'ClassLibrary' }}
-        run: ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} -Properties Configuration=${{ inputs.build-configuration }} -OutputDirectory ./nupkg -Build
+        run: ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} -Properties Configuration=${{ inputs.build-configuration }} -OutputDirectory ./nupkg
         shell: pwsh
       
       # Authenticate and Publish to GitHub Packages
