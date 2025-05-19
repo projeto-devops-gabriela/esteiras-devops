@@ -77,20 +77,20 @@ jobs:
         shell: pwsh
         run: |
           ./nuget.exe sources add -Name "github" `
-            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
+          -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+          -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
 
           ./nuget.exe push **/*.nupkg `
-            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
+          -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+          -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
 
       - name: Mover artefatos para pasta temporária
         if: ${{ inputs.project-type == 'WindowsFormsApp' }}
         shell: pwsh
         run: |
           mkdir build-output
-          Copy-Item -Path "**\bin\${{ inputs.build-configuration }}\*.exe" -Destination build-output -Recurse -Force
-          Copy-Item -Path "**\bin\${{ inputs.build-configuration }}\*.dll" -Destination build-output -Recurse -Force
+          Copy-Item -Path **\bin\${{ inputs.build-configuration }}\*.exe -Destination build-output -Recurse -Force
+          Copy-Item -Path **\bin\${{ inputs.build-configuration }}\*.dll -Destination build-output -Recurse -Force
 
       - name: Upload de artefatos para CD
         if: ${{ inputs.project-type == 'WindowsFormsApp' }}
