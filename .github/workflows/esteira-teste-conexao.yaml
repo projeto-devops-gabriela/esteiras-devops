@@ -29,6 +29,7 @@ jobs:
       # Restore NuGet packages
       - name: Restore NuGet packages
         run: nuget restore
+        working-directory: ${{ inputs.project-directory }}
 
       # Build
       - name: Build
