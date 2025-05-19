@@ -6,13 +6,16 @@ on:
       project-directory:
         required: true
         type: string
+        description: 'Path to the project directory. Example: src/ClassLibrary1'
       project-type:
         required: true
         type: string
+        description: 'Type of project. Options: ClassLibrary, WindowsFormsApp'
       build-configuration:
         required: false
         type: string
         default: 'Release'
+        description: 'Build configuration. Options: Release, Debug'
 
 jobs:
   build-and-test:
