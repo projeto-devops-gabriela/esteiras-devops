@@ -80,14 +80,20 @@ jobs:
             -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
         shell: pwsh
 
+      - name: Mover artefatos para pasta temporária
+        if: ${{ inputs.project-type == 'WindowsFormsApp' }}
+        run: |
+          mkdir build-output
+          copy **\bin\${{ inputs.build-configuration }}\*.exe build-output\
+          copy **\bin\${{ inputs.build-configuration }}\*.dll build-output\
+        shell: pwsh
+
       - name: Upload de artefatos para CD
         if: ${{ inputs.project-type == 'WindowsFormsApp' }}
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: |
-            '**/bin/${{ inputs.build-configuration }}/*.exe'
-            '**/bin/${{ inputs.build-configuration }}/*.dll'
+          path: build-output/
 
   publish:
     if: ${{ inputs.project-type == 'WindowsFormsApp' }}
