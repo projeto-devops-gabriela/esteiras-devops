@@ -63,9 +63,10 @@ jobs:
 
       - name: Empacotar NuGet
         if: ${{ inputs.project-type == 'ClassLibrary' }}
-        run: ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} `
-              -Properties Configuration=${{ inputs.build-configuration }} `
-              -OutputDirectory ./nupkg -Build
+        run: |
+          ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} `
+          -Properties Configuration=${{ inputs.build-configuration }} `
+          -OutputDirectory ./nupkg -Build
         shell: pwsh
 
       - name: Publicar NuGet no GitHub Packages
