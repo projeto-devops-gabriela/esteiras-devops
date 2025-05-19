@@ -23,10 +23,10 @@ jobs:
 
       - name: Encontrar arquivo .sln
         id: find-sln
+        shell: bash
         run: |
           sln_path=$(find . -name "*.sln" | head -n 1)
-          echo "sln_path=$sln_path" >> $GITHUB_OUTPUT
-        shell: bash
+          echo "sln_path=$sln_path" >> "$GITHUB_OUTPUT"
 
       - name: Restaurar pacotes NuGet
         run: nuget restore "${{ steps.find-sln.outputs.sln_path }}"
@@ -53,24 +53,28 @@ jobs:
 
       - name: Baixar nuget.exe
         if: ${{ inputs.project-type == 'ClassLibrary' }}
-        run: curl -o nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+        run: |
+          curl -o nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
 
       - name: Encontrar .csproj
         if: ${{ inputs.project-type == 'ClassLibrary' }}
         id: find-csproj
-        run: echo "csproj_path=$(find . -name '*.csproj' | head -n 1)" >> $GITHUB_OUTPUT
         shell: bash
+        run: |
+          csproj_path=$(find . -name '*.csproj' | head -n 1)
+          echo "csproj_path=$csproj_path" >> "$GITHUB_OUTPUT"
 
       - name: Empacotar NuGet
         if: ${{ inputs.project-type == 'ClassLibrary' }}
+        shell: pwsh
         run: |
           ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} `
-          -Properties Configuration=${{ inputs.build-configuration }} `
-          -OutputDirectory ./nupkg -Build
-        shell: pwsh
+            -Properties Configuration=${{ inputs.build-configuration }} `
+            -OutputDirectory ./nupkg -Build
 
       - name: Publicar NuGet no GitHub Packages
         if: ${{ inputs.project-type == 'ClassLibrary' }}
+        shell: pwsh
         run: |
           ./nuget.exe sources add -Name "github" `
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
@@ -79,15 +83,14 @@ jobs:
           ./nuget.exe push **/*.nupkg `
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
             -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
-        shell: pwsh
 
       - name: Mover artefatos para pasta temporária
         if: ${{ inputs.project-type == 'WindowsFormsApp' }}
+        shell: pwsh
         run: |
           mkdir build-output
-          copy **\bin\${{ inputs.build-configuration }}\*.exe build-output\
-          copy **\bin\${{ inputs.build-configuration }}\*.dll build-output\
-        shell: pwsh
+          Copy-Item -Path "**\bin\${{ inputs.build-configuration }}\*.exe" -Destination build-output -Recurse -Force
+          Copy-Item -Path "**\bin\${{ inputs.build-configuration }}\*.dll" -Destination build-output -Recurse -Force
 
       - name: Upload de artefatos para CD
         if: ${{ inputs.project-type == 'WindowsFormsApp' }}
@@ -100,7 +103,6 @@ jobs:
     if: ${{ inputs.project-type == 'WindowsFormsApp' }}
     runs-on: windows-latest
     needs: build-and-test
-
     steps:
       - name: Baixar artefatos de build
         uses: actions/download-artifact@v4
@@ -111,7 +113,8 @@ jobs:
       - name: Criar release no GitHub
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v1.0.0
+          tag_name: v${{ github.run_number }}
           files: build/**/*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
