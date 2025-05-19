@@ -29,17 +29,17 @@ jobs:
       - name: Setup MSBuild path
         uses: microsoft/setup-msbuild@v2
 
-      # Restore NuGet packages
-      - name: Restore NuGet packages
-        run: nuget restore
-        shell: pwsh
-
       # Find .sln path
       - name: Find solution
         id: find_sln
         run: |
           $sln = Get-ChildItem -Recurse -Filter *.sln | Select-Object -First 1
           echo "SLN_PATH=$($sln.FullName)" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      # Restore NuGet packages
+      - name: Restore NuGet packages
+        run: nuget restore "$env:SLN_PATH"
         shell: pwsh
 
       # Build
