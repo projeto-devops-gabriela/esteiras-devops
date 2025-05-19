@@ -79,7 +79,9 @@ jobs:
       # Pack the NuGet package
       - name: Pack NuGet package
         if: ${{ inputs.project-type == 'ClassLibrary' }}
-        run: ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} -Properties Configuration=${{ inputs.build-configuration }} -OutputDirectory ./nupkg
+        run: |
+          $version = "1.0.${{ github.run_number }}"
+          ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} -Properties Configuration=${{ inputs.build-configuration }} -Version $version -OutputDirectory ./nupkg
         shell: pwsh
       
       # Authenticate and Publish to GitHub Packages
@@ -116,7 +118,7 @@ jobs:
       - name: Deploy to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v1.0.0
+          tag_name: v1.0.${{ github.run_number }}
           files: build/**/*.exe
           draft: false
           prerelease: false
