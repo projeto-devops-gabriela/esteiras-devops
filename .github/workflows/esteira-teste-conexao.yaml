@@ -32,7 +32,7 @@ jobs:
       # Restore NuGet packages
       - name: Restore NuGet packages
         run: nuget restore
-        working-directory: ${{ inputs.project-directory }}
+        shell: pwsh
 
       # Find .sln path
       - name: Find solution
@@ -40,10 +40,12 @@ jobs:
         run: |
           $sln = Get-ChildItem -Recurse -Filter *.sln | Select-Object -First 1
           echo "SLN_PATH=$($sln.FullName)" >> $env:GITHUB_ENV
+        shell: pwsh
 
       # Build
       - name: Build
         run: msbuild "$env:SLN_PATH" /p:Configuration=${{ inputs.build-configuration }}
+        shell: pwsh
 
       # Setup VSTest
       - name: Setup VSTest
@@ -61,7 +63,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.organization=${{ vars.ORGANIZATION_SONAR }}
+            -Dsonar.organization=${{ github.repository_owner }}
             -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*
