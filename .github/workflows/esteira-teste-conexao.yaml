@@ -86,8 +86,8 @@ jobs:
         with:
           name: build-artifacts
           path: |
-            **/bin/${{ inputs.build-configuration }}/*.exe
-            **/bin/${{ inputs.build-configuration }}/*.dll
+            '**/bin/${{ inputs.build-configuration }}/*.exe'
+            '**/bin/${{ inputs.build-configuration }}/*.dll'
 
   publish:
     if: ${{ inputs.project-type == 'WindowsFormsApp' }}
