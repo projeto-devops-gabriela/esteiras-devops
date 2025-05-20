@@ -54,7 +54,6 @@ jobs:
           $testDlls = Get-ChildItem -Recurse -Filter *.dll | Where-Object {
             $_.Name -match '.*Test.*\.dll$' -and
             $_.FullName -notmatch '\\(obj|ref|packages)\\'
-            Test-Path ($_.FullName -replace '\.dll$', '.pdb')
           }
 
           if (-not $testDlls) {
