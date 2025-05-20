@@ -84,6 +84,7 @@ jobs:
           $version = "1.0.${{ github.run_number }}"
           ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} -Properties Configuration=${{ inputs.build-configuration }} -Version $version -OutputDirectory ./nupkg
         shell: pwsh
+        working-directory: ${{ github.workspace }}
       
       # Authenticate and Publish to GitHub Packages
       - name: Authenticate and Publish to GitHub Packages
@@ -94,6 +95,7 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ${{ github.workspace }}
 
       # Prepare artifacts folders
       - name: Prepare artifacts folder (excluding Test folders)
