@@ -99,12 +99,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Find build artifacts
-      - name: Select build artifacts (excluding Test folders)
+      # Prepare artifacts folders
+      - name: Prepare artifacts folder (excluding Test folders)
+        if: ${{ inputs.project-type == 'WindowsFormsApp' }}
         run: |
+          mkdir -p artifacts
           find . -type f -path "*/bin/${{ inputs.build-configuration }}/*" \
           ! -path "*/Test*/bin/*" \
-          ! -path "*/Tests*/bin/*" > artifacts.txt
+          ! -path "*/Tests*/bin/*" \
+          -exec cp --parents {} artifacts/ \;
         shell: bash
 
       # Upload build artifacts for CD
@@ -113,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: artifacts.txt
+          path: artifacts/
 
   publish:
     if: ${{ inputs.project-type == 'WindowsFormsApp' }}
