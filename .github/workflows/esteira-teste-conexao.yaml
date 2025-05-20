@@ -52,7 +52,7 @@ jobs:
         shell: pwsh
         run: |
           $testDlls = Get-ChildItem -Recurse -Filter *.dll | Where-Object {
-            $_.Name -match '.*Test.*\.dll$' -and
+            $_.Name -imatch '.*Test.*\.dll$' -and
             $_.FullName -notmatch '\\(obj|ref|packages)\\' -and
             (Test-Path ($_.FullName -replace '\.dll$', '.pdb'))
           }
