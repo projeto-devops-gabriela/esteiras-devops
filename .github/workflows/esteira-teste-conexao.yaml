@@ -105,6 +105,7 @@ jobs:
           find . -type f -path "*/bin/${{ inputs.build-configuration }}/*" \
           ! -path "*/Test*/bin/*" \
           ! -path "*/Tests*/bin/*" > artifacts.txt
+        shell: bash
 
       # Upload build artifacts for CD
       - name: Upload build artifacts
