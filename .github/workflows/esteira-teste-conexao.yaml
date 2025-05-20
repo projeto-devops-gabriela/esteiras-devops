@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: ${{ inputs.project-directory }}/bin/${{ inputs.build-configuration }}/
+          path: "**/bin/${{ inputs.build-configuration }}/"
 
   publish:
     if: ${{ inputs.project-type == 'WindowsFormsApp' }}
