@@ -84,18 +84,24 @@ jobs:
           $version = "1.0.${{ github.run_number }}"
           ./nuget.exe pack ${{ steps.find-csproj.outputs.csproj_path }} -Properties Configuration=${{ inputs.build-configuration }} -Version $version -OutputDirectory ./nupkg
         shell: pwsh
-        working-directory: ${{ github.workspace }}
-      
-      # Authenticate and Publish to GitHub Packages
-      - name: Authenticate and Publish to GitHub Packages
+
+      # Push all NuGet packages in /nupkg/ folders
+      - name: Push all NuGet packages in /nupkg/ folders
         if: ${{ inputs.project-type == 'ClassLibrary' }}
-        run: |
-          nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
-          nuget.exe push "nupkg/*.nupkg" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
         shell: pwsh
+        run: |
+          $pkgs = Get-ChildItem -Recurse -Filter *.nupkg | Where-Object { $_.DirectoryName -match '\\nupkg\\' }
+          if (-not $pkgs) {
+            Write-Error "No .nupkg files found in any /nupkg/ folders"
+            exit 1
+          }
+          nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
+          foreach ($pkg in $pkgs) {
+            Write-Host "Pushing: $($pkg.FullName)"
+            nuget.exe push $pkg.FullName -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey "${{ secrets.GITHUB_TOKEN }}" -SkipDuplicate
+          }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: ${{ github.workspace }}
 
       # Prepare artifacts folders
       - name: Prepare artifacts folder (excluding Test folders)
