@@ -3,10 +3,6 @@ name: esteira-teste-conexao
 on:
   workflow_call:
     inputs:
-      project-directory:
-        required: true
-        type: string
-        description: 'Path to the project directory. Example: src/ClassLibrary1'
       project-type:
         required: true
         type: string
