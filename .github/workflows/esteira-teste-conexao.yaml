@@ -48,17 +48,13 @@ jobs:
         uses: darenm/Setup-VSTest@v1
 
       # Run tests
-      # - name: Run tests
-      #   run: |
-      #     vstest.console.exe **/*Test*.dll --logger:trx
-
-      # Run tests
       - name: Run tests
         shell: pwsh
         run: |
           $testDlls = Get-ChildItem -Recurse -Filter *.dll | Where-Object {
             $_.Name -match '.*Test.*\.dll$' -and
             $_.FullName -notmatch '\\(obj|ref|packages)\\'
+            Test-Path ($_.FullName -replace '\.dll$', '.pdb')
           }
 
           if (-not $testDlls) {
