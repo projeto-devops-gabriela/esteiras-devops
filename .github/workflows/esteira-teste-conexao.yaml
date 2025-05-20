@@ -90,7 +90,7 @@ jobs:
         if: ${{ inputs.project-type == 'ClassLibrary' }}
         run: |
           nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
-          nuget.exe push ./nupkg/*.nupkg -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
+          nuget.exe push "nupkg/*.nupkg" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey ${{ secrets.GITHUB_TOKEN }} -SkipDuplicate
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
