@@ -25,6 +25,10 @@ jobs:
       - name: Setup MSBuild path
         uses: microsoft/setup-msbuild@v2
 
+      # Setup Nuget
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
       # Find .sln path
       - name: Find solution
         id: find_sln
