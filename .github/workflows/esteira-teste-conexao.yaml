@@ -90,7 +90,7 @@ jobs:
         if: ${{ inputs.project-type == 'ClassLibrary' }}
         shell: pwsh
         run: |
-          $pkgs = Get-ChildItem -Recurse -Filter *.nupkg | Where-Object { $_.DirectoryName -like '*\nupkg\*' }
+          $pkgs = Get-ChildItem -Recurse -Filter *.nupkg | Where-Object { $_.DirectoryName -like '*/nupkg/*' }
           if (-not $pkgs) {
             Write-Error "No .nupkg files found in any /nupkg/ folders"
             exit 1
