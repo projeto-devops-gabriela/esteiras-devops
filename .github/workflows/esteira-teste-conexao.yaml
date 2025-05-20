@@ -63,7 +63,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.organization=${{ vars.ORGANIZATION_SONAR }}
             -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*
