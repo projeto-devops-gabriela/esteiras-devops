@@ -78,7 +78,7 @@ jobs:
         if: ${{ inputs.project-type == 'ClassLibrary' }}
         id: find-csproj
         run: |
-          echo "csproj_path=$(find '${{ inputs.project-directory }}' -name '*.csproj' | head -n 1)" >> $GITHUB_OUTPUT
+          echo "csproj_path=$(find . -type f -name '*.csproj' | grep -v '/[Tt]est' | head -n 1)" >> $GITHUB_OUTPUT
         shell: bash
 
       # Pack the NuGet package
