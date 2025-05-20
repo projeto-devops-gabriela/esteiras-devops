@@ -53,16 +53,16 @@ jobs:
           vstest.console.exe **/*Test*.dll --logger:trx
 
       # Sonar
-      # - name: Sonarqube Scanner
-      #   uses: SonarSource/sonarqube-scan-action@v5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   with:
-      #     args: >
-      #       -Dsonar.organization=${{ vars.ORGANIZATION_SONAR }}
-      #       -Dsonar.projectKey=${{ github.event.repository.name }}
-      #       -Dsonar.verbose=true
-      #       -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*
+      - name: Sonarqube Scanner
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.ORGANIZATION_SONAR }}
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.verbose=true
+            -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*
 
       # Download nuget.exe
       - name: Download nuget.exe
