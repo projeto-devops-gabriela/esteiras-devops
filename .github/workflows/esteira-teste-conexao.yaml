@@ -105,8 +105,8 @@ jobs:
         run: |
           mkdir -p artifacts
           find . -type f -path "*/bin/${{ inputs.build-configuration }}/*" \
-          ! -path "*/Test*/bin/*" \
-          ! -path "*/Tests*/bin/*" \
+          ! -path "*/*Test*/bin/*" \
+          ! -path "*/*Tests*/bin/*" \
           -exec cp --parents {} artifacts/ \;
         shell: bash
 
