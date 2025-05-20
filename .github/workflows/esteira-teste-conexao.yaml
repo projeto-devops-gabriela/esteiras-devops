@@ -48,9 +48,28 @@ jobs:
         uses: darenm/Setup-VSTest@v1
 
       # Run tests
+      # - name: Run tests
+      #   run: |
+      #     vstest.console.exe **/*Test*.dll --logger:trx
+
+      # Run tests
       - name: Run tests
+        shell: pwsh
         run: |
-          vstest.console.exe **/*Test*.dll --logger:trx
+          $testDlls = Get-ChildItem -Recurse -Filter *.dll | Where-Object {
+            $_.Name -match '.*Test.*\.dll$' -and
+            $_.FullName -notmatch '\\(obj|ref)\\'
+          }
+
+          if (-not $testDlls) {
+            Write-Error "No test DLLs found"
+            exit 1
+          }
+
+          foreach ($dll in $testDlls) {
+            Write-Host "Running tests in: $($dll.FullName)"
+            vstest.console.exe $dll.FullName --logger:trx
+          }
 
       # Sonar
       - name: Sonarqube Scanner
