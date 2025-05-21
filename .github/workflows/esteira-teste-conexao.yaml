@@ -78,17 +78,17 @@ jobs:
 
           response=$(curl -s -o /dev/null -w "%{http_code}" \
             -u "${{ secrets.SONAR_TOKEN }}:" \
-            -d "organization=${{ secrets.SONAR_ORGANIZATION }}" \
+            -d "organization=${{ vars.ORGANIZATION_SONAR }}" \
             -d "name=${{ github.event.repository.name }}" \
             -d "project=${{ github.event.repository.name }}" \
             https://sonarcloud.io/api/projects/create)
 
-          if [ "$response" == "200" ]; then
-            echo "Projeto criado com sucesso no SonarCloud."
-          elif [ "$response" == "400" ]; then
-            echo "Projeto já existe no SonarCloud. Continuando..."
+          if [ "$response" -eq 200 ]; then
+            echo "SonarCloud project successfully created"
+          elif [ "$response" -eq 409 ]; then
+            echo "SonarCloud project already exists"
           else
-            echo "Erro inesperado ao tentar criar o projeto no SonarCloud (HTTP $response)."
+            echo "Failed to create SonarCloud project (HTTP $response). Continuing with the workflow."
           fi
 
       # Sonar
