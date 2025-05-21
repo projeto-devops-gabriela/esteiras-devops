@@ -70,7 +70,7 @@ jobs:
             }
           }
 
-      # Criar projeto no SonarCloud (se necessário)
+      # Criar projeto no SonarCloud
       - name: Criar projeto no SonarCloud (se necessário)
         shell: bash
         run: |
@@ -78,7 +78,7 @@ jobs:
 
           response=$(curl -s -o /dev/null -w "%{http_code}" \
             -u "${{ secrets.SONAR_TOKEN }}:" \
-            -d "organization=${{ vars.ORGANIZATION_SONAR }}" \
+            -d "organization=${{ secrets.SONAR_ORGANIZATION }}" \
             -d "name=${{ github.event.repository.name }}" \
             -d "project=${{ github.event.repository.name }}" \
             https://sonarcloud.io/api/projects/create)
