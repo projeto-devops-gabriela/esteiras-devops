@@ -70,6 +70,27 @@ jobs:
             }
           }
 
+      # Criar projeto no SonarCloud (se necessário)
+      - name: Criar projeto no SonarCloud (se necessário)
+        shell: bash
+        run: |
+          echo "Verificando/criando projeto no SonarCloud..."
+
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+          -u "${{ secrets.SONAR_TOKEN }}:" \
+          -d "organization=${{ vars.ORGANIZATION_SONAR }}" \
+          -d "name=${{ github.event.repository.name }}" \
+          -d "project=${{ github.event.repository.name }}" \
+          https://sonarcloud.io/api/projects/create)
+
+          if [ "$response" == "200" ]; then
+            echo "Projeto criado com sucesso no SonarCloud."
+          elif [ "$response" == "400" ]; then
+            echo "Projeto já existe no SonarCloud. Continuando..."
+          else
+            echo "Erro inesperado ao tentar criar o projeto no SonarCloud (HTTP $response)."
+          fi
+
       # Sonar
       - name: Sonarqube Scanner
         uses: SonarSource/sonarqube-scan-action@v5
