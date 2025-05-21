@@ -71,7 +71,7 @@ jobs:
           }
 
       # Criar projeto no SonarCloud
-      - name: Criar projeto no SonarCloud (se necessário)
+      - name: Criar projeto no SonarCloud (se necessario)
         shell: bash
         run: |
           echo "Verificando/criando projeto no SonarCloud..."
