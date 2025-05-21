@@ -86,7 +86,7 @@ jobs:
             Write-Host "Projeto criado no SonarCloud."
           } catch {
             if ($_.Exception.Response.StatusCode.value__ -eq 400) {
-              Write-Host "Projeto já existe no SonarCloud, seguindo..."
+              Write-Host "Projeto ja existe no SonarCloud, seguindo..."
             } else {
               throw $_
             }
