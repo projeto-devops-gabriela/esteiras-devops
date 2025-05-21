@@ -70,28 +70,30 @@ jobs:
             }
           }
 
-      # Criar projeto no SonarCloud
-      - name: Criar projeto no SonarCloud (se necessario)
-        shell: bash
+      # Criando SonarQube
+      - name: Create SonarCloud Project (if not exists)
         run: |
-          echo "Verificando/criando projeto no SonarCloud..."
+          $headers = @{
+            "Authorization" = "Basic $([Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${{ secrets.SONAR_TOKEN }}:")))"
+          }
+          $body = @{
+            organization = "${{ vars.ORGANIZATION_SONAR }}"
+            project = "${{ github.event.repository.name }}"
+            name = "${{ github.event.repository.name }}"
+          }
+          try {
+            Invoke-RestMethod -Uri "https://sonarcloud.io/api/projects/create" -Method Post -Headers $headers -Body $body -ErrorAction Stop
+            Write-Host "Projeto criado no SonarCloud."
+          } catch {
+            if ($_.Exception.Response.StatusCode.value__ -eq 400) {
+              Write-Host "Projeto já existe no SonarCloud, seguindo..."
+            } else {
+              throw $_
+            }
+          }
+        shell: pwsh
 
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
-            -u "${{ secrets.SONAR_TOKEN }}:" \
-            -d "organization=${{ vars.ORGANIZATION_SONAR }}" \
-            -d "name=${{ github.event.repository.name }}" \
-            -d "project=${{ github.event.repository.name }}" \
-            https://sonarcloud.io/api/projects/create)
-
-          if [ "$response" -eq 200 ]; then
-            echo "SonarCloud project successfully created"
-          elif [ "$response" -eq 409 ]; then
-            echo "SonarCloud project already exists"
-          else
-            echo "Failed to create SonarCloud project (HTTP $response). Continuing with the workflow."
-          fi
-
-      # Sonar
+      # Rodando SonarQube
       - name: Sonarqube Scanner
         uses: SonarSource/sonarqube-scan-action@v5
         env:
