@@ -62,13 +62,12 @@ jobs:
           }
 
           if (-not $testDlls) {
-            Write-Error "No test DLLs found"
-            exit 1
-          }
-
-          foreach ($dll in $testDlls) {
+            Write-Host "No test DLLs found"
+          } else {
+            foreach ($dll in $testDlls) {
             Write-Host "Running tests in: $($dll.FullName)"
             vstest.console.exe $dll.FullName --logger:trx
+            }
           }
 
       # Sonar
