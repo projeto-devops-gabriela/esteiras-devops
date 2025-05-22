@@ -1,0 +1,78 @@
+name: esteira-package-nuspec
+
+on:
+  workflow_call:
+    inputs:
+      build-configuration:
+        required: false
+        type: string
+        default: 'Release'
+        description: 'Build configuration. Options: Release, Debug'
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Setup MSBuild
+      - name: Setup MSBuild path
+        uses: microsoft/setup-msbuild@v2
+
+      # Setup Nuget
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      # Find .sln path
+      - name: Find solution
+        id: find_sln
+        run: |
+          $sln = Get-ChildItem -Recurse -Filter *.sln | Select-Object -First 1
+          echo "SLN_PATH=$($sln.FullName)" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      # Restore NuGet packages
+      - name: Restore NuGet packages
+        run: nuget restore "$env:SLN_PATH"
+        shell: pwsh
+
+      # Build
+      - name: Build
+        run: msbuild "$env:SLN_PATH" /p:Configuration=${{ inputs.build-configuration }}
+        shell: pwsh
+
+      # Download nuget.exe
+      - name: Download nuget.exe
+        run: |
+          curl -o nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+
+      - name: Find .nuspec path
+        id: find-nuspec
+        run: |
+          echo "nuspec_path=$(find . -type f -name '*.nuspec' | head -n 1)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Pack the NuGet package
+      - name: Pack NuGet package
+        run: |
+          ./nuget.exe pack ${{ steps.find-nuspec.outputs.nuspec_path }} -Properties Configuration=${{ inputs.build-configuration }} -OutputDirectory ./nupkg
+        shell: pwsh
+
+      # Push all NuGet packages in /nupkg/ folders
+      - name: Push all NuGet packages in /nupkg/ folders
+        shell: pwsh
+        run: |
+          $pkgs = Get-ChildItem -Recurse -Filter *.nupkg | Where-Object { $_.FullName -match '[\\/]+nupkg[\\/]' }
+          if (-not $pkgs) {
+            Write-Error "No .nupkg files found in any /nupkg/ folders"
+            exit 1
+          }
+          nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
+          foreach ($pkg in $pkgs) {
+            Write-Host "Pushing: $($pkg.FullName)"
+            nuget.exe push $pkg.FullName -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey "${{ secrets.GITHUB_TOKEN }}" -SkipDuplicate
+          }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
