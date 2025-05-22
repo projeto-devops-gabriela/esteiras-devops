@@ -69,10 +69,10 @@ jobs:
             Write-Error "No .nupkg files found in any /nupkg/ folders"
             exit 1
           }
-          nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
+          nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.CLASS_LIB_CONSUMIR }}
           foreach ($pkg in $pkgs) {
             Write-Host "Pushing: $($pkg.FullName)"
-            nuget.exe push $pkg.FullName -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey "${{ secrets.GITHUB_TOKEN }}" -SkipDuplicate
+            nuget.exe push $pkg.FullName -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey "${{ secrets.CLASS_LIB_CONSUMIR }}" -SkipDuplicate
           }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLASS_LIB_CONSUMIR: ${{ secrets.CLASS_LIB_CONSUMIR }}
