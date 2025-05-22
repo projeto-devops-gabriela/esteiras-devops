@@ -100,8 +100,8 @@ jobs:
 
           $body = @{
             organization = "${{ vars.ORGANIZATION_SONAR }}"
-            project      = "${{ github.event.repository.name }}"
-            name         = "${{ github.event.repository.name }}"
+            project      = "${{ github.repository_owner }}_${{ github.event.repository.name }}"
+            name         = "${{ github.repository_owner }}_${{ github.event.repository.name }}"
           }
 
           try {
@@ -129,7 +129,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=${{ vars.ORGANIZATION_SONAR }}
-            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*
 
