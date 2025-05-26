@@ -150,8 +150,6 @@ jobs:
             Write-Host "Pushing: $($pkg.FullName)"
             nuget.exe push $pkg.FullName -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey "${{ secrets.AUTHENTICATOR_G_TOKEN }}" -SkipDuplicate
           }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Prepare artifacts folders
       - name: Prepare artifacts folder (excluding Test folders)
@@ -193,4 +191,4 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.AUTHENTICATOR_G_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
