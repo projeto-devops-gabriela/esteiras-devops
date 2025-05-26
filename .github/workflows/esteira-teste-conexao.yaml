@@ -71,25 +71,6 @@ jobs:
           }
 
       # Criar projeto no SonarCloud
-      # - name: Criar projeto no SonarCloud (se necessario)
-      #   shell: bash
-      #   run: |
-      #     echo "Verificando/criando projeto no SonarCloud..."
-
-      #     response=$(curl -s -o /dev/null -w "%{http_code}" \
-      #       -u "${{ secrets.SONAR_TOKEN }}:" \
-      #       -d "organization=${{ vars.ORGANIZATION_SONAR }}" \
-      #       -d "name=${{ github.event.repository.name }}" \
-      #       -d "project=${{ github.event.repository.name }}" \
-      #       https://sonarcloud.io/api/projects/create)
-
-      #     if [ "$response" -eq 200 ]; then
-      #       echo "SonarCloud project successfully created"
-      #     elif [ "$response" -eq 409 ]; then
-      #       echo "SonarCloud project already exists"
-      #     else
-      #       echo "Failed to create SonarCloud project (HTTP $response). Continuing with the workflow."
-      #     fi
       - name: Criar projeto no SonarQube via PowerShell
         shell: pwsh
         run: |
@@ -164,10 +145,10 @@ jobs:
             Write-Error "No .nupkg files found in any /nupkg/ folders"
             exit 1
           }
-          nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
+          nuget.exe sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.AUTHENTICATOR_G_TOKEN }}
           foreach ($pkg in $pkgs) {
             Write-Host "Pushing: $($pkg.FullName)"
-            nuget.exe push $pkg.FullName -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey "${{ secrets.GITHUB_TOKEN }}" -SkipDuplicate
+            nuget.exe push $pkg.FullName -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -ApiKey "${{ secrets.AUTHENTICATOR_G_TOKEN }}" -SkipDuplicate
           }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -212,4 +193,4 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.AUTHENTICATOR_G_TOKEN }}
