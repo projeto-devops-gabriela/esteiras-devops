@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: Checkout codigo
         uses: actions/checkout@v4
+      
+      - name: Localizar arquivo mvnw
+        id: find-mvnw
+        shell: bash
+        run: echo "MAVEN_DIR=$(dirname $(find . -name 'mvnw'))" >> $GITHUB_ENV
 
       - name: Desfazer shallow clone
         shell: bash
@@ -25,17 +30,17 @@ jobs:
       - name: Permitir execucao do mvnw
         shell: bash
         run: chmod +x ./mvnw
-        working-directory: demo
+        working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Build com Maven
         shell: bash
         run: ./mvnw clean install
-        working-directory: demo
+        working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Executar testes
         shell: bash
         run: ./mvnw test
-        working-directory: demo
+        working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Criar projeto no SonarCloud via API
         shell: bash
@@ -58,7 +63,7 @@ jobs:
             -Dsonar.token=${SONAR_TOKEN} \
             -Dsonar.branch.name=${{ github.ref_name }} \
             -Dsonar.verbose=true
-        working-directory: demo
+        working-directory: ${{ env.MAVEN_DIR }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -67,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: demo-artifact
-          path: demo/target/*.jar
+          path: ${{ env.MAVEN_DIR }}/target/*.jar
 
   deploy:
     needs: build
@@ -76,6 +81,11 @@ jobs:
     steps:
       - name: Checkout codigo
         uses: actions/checkout@v4
+      
+      - name: Localizar arquivo mvnw
+        id: find-mvnw
+        shell: bash
+        run: echo "MAVEN_DIR=$(dirname $(find . -name 'mvnw'))" >> $GITHUB_ENV
 
       - name: Configurar Java
         uses: actions/setup-java@v4
@@ -86,20 +96,20 @@ jobs:
       - name: Permitir execucao do mvnw
         shell: bash
         run: chmod +x ./mvnw
-        working-directory: demo
+        working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Baixar artefato do build
         uses: actions/download-artifact@v4
         with:
           name: demo-artifact
-          path: demo/target
+          path: ${{ env.MAVEN_DIR }}/target
 
       - name: Publicar no GitHub Packages (Maven)
         shell: bash
         run: |
           ./mvnw deploy -DskipTests --settings settings.xml \
             -DaltDeploymentRepository=github::https://maven.pkg.github.com/${{ github.repository }}
-        working-directory: demo
+        working-directory: ${{ env.MAVEN_DIR }}
         env:
           AUTHENTICATOR_G_TOKEN: ${{ secrets.AUTHENTICATOR_G_TOKEN }}
 
@@ -110,7 +120,7 @@ jobs:
       - name: Build da imagem Docker
         shell: bash
         run: docker build -t ghcr.io/${{ github.repository }}/demo-app:latest .
-        working-directory: demo
+        working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Push da imagem Docker
         shell: bash
