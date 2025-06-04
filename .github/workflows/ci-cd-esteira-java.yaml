@@ -1,5 +1,5 @@
 name: ci-cd-esteira-java
-# Este workflow realiza o build, testes, análise de código com SonarCloud e deploy de uma aplicação Java usando Maven e Docker.
+# Este workflow realiza o build, testes, analise de codigo com SonarCloud e deploy de uma aplicacao Java usando Maven e Docker.
 
 on:
   workflow_call:
@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout codigo
         uses: actions/checkout@v4
 
       - name: Desfazer shallow clone
@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Permitir execução do mvnw
+      - name: Permitir execucao do mvnw
         shell: bash
         run: chmod +x ./mvnw
         working-directory: demo
@@ -48,7 +48,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Análise SonarCloud
+      - name: Analise SonarCloud
         shell: bash
         run: |
           ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar \
@@ -74,7 +74,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout codigo
         uses: actions/checkout@v4
 
       - name: Configurar Java
@@ -83,7 +83,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Permitir execução do mvnw
+      - name: Permitir execucao do mvnw
         shell: bash
         run: chmod +x ./mvnw
         working-directory: demo
