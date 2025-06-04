@@ -104,37 +104,45 @@ jobs:
           name: demo-artifact
           path: ${{ env.MAVEN_DIR }}/target
       
-      - name: Criar arquivo settings.xml
+      - name: Criar arquivo settings.xml (se nao existir)
         shell: bash
         run: |
-          cat <<EOF > ${{ env.MAVEN_DIR }}/settings.xml
-          <settings>
-              <servers>
-                  <server>
-                      <id>github</id>
-                      <username>${{ github.actor }}</username>
-                      <password>${{ secrets.AUTHENTICATOR_G_TOKEN }}</password>
-                  </server>
-              </servers>
-          </settings>
-          EOF
+          if [ ! -f "${{ env.MAVEN_DIR }}/settings.xml" ]; then
+            cat <<EOF > ${{ env.MAVEN_DIR }}/settings.xml
+            <settings>
+                <servers>
+                    <server>
+                        <id>github</id>
+                        <username>${{ github.actor }}</username>
+                        <password>${{ secrets.AUTHENTICATOR_G_TOKEN }}</password>
+                    </server>
+                </servers>
+            </settings>
+            EOF
+          else
+            echo "Arquivo settings.xml ja existe. Pulando criacao."
+          fi
 
-      - name: Criar arquivo Dockerfile
+      - name: Criar arquivo Dockerfile (se nao existir)
         shell: bash
         run: |
-          cat <<EOF > ${{ env.MAVEN_DIR }}/Dockerfile
-          # Use uma imagem base Java
-          FROM eclipse-temurin:17-jre
+          if [ ! -f "${{ env.MAVEN_DIR }}/Dockerfile" ]; then
+            cat <<EOF > ${{ env.MAVEN_DIR }}/Dockerfile
+            # Use uma imagem base Java
+            FROM eclipse-temurin:17-jre
 
-          # Diretório de trabalho dentro do container
-          WORKDIR /app
+            # Diretorio de trabalho dentro do container
+            WORKDIR /app
 
-          # Copia o JAR gerado pelo Maven para o container
-          COPY target/*.jar app.jar
+            # Copia o JAR gerado pelo Maven para o container
+            COPY target/*.jar app.jar
 
-          # Comando para rodar o JAR
-          ENTRYPOINT ["java", "-jar", "app.jar"]
-          EOF
+            # Comando para rodar o JAR
+            ENTRYPOINT ["java", "-jar", "app.jar"]
+            EOF
+          else
+            echo "Arquivo Dockerfile ja existe. Pulando criacao."
+          fi
 
       - name: Publicar no GitHub Packages (Maven)
         shell: bash
