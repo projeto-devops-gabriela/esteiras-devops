@@ -38,7 +38,7 @@ jobs:
 
       - name: Executar testes
         shell: bash
-        run: ./mvnw test jacoco:report
+        run: ./mvnw test clean verify org.jacoco:jacoco-maven-plugin:0.8.10:report
         working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Criar projeto no SonarCloud via API
