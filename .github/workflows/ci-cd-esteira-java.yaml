@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Permitir execucao do mvnw
         shell: bash
@@ -91,7 +91,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Permitir execucao do mvnw
         shell: bash
@@ -104,45 +104,37 @@ jobs:
           name: demo-artifact
           path: ${{ env.MAVEN_DIR }}/target
       
-      - name: Criar arquivo settings.xml (se nao existir)
+      - name: Criar arquivo settings.xml
         shell: bash
         run: |
-          if [ ! -f "${{ env.MAVEN_DIR }}/settings.xml" ]; then
-            cat <<EOF > ${{ env.MAVEN_DIR }}/settings.xml
-            <settings>
-                <servers>
-                    <server>
-                        <id>github</id>
-                        <username>${{ github.actor }}</username>
-                        <password>${{ secrets.AUTHENTICATOR_G_TOKEN }}</password>
-                    </server>
-                </servers>
-            </settings>
-            EOF
-          else
-            echo "Arquivo settings.xml ja existe. Pulando criacao."
-          fi
+          cat <<EOF > ${{ env.MAVEN_DIR }}/settings.xml
+          <settings>
+              <servers>
+                  <server>
+                      <id>github</id>
+                      <username>${{ github.actor }}</username>
+                      <password>${{ secrets.AUTHENTICATOR_G_TOKEN }}</password>
+                  </server>
+              </servers>
+          </settings>
+          EOF
 
-      - name: Criar arquivo Dockerfile (se nao existir)
+      - name: Criar arquivo Dockerfile
         shell: bash
         run: |
-          if [ ! -f "${{ env.MAVEN_DIR }}/Dockerfile" ]; then
-            cat <<EOF > ${{ env.MAVEN_DIR }}/Dockerfile
-            # Use uma imagem base Java
-            FROM eclipse-temurin:17-jre
+          cat <<EOF > ${{ env.MAVEN_DIR }}/Dockerfile
+          # Use uma imagem base Java
+          FROM eclipse-temurin:${{ vars.JAVA_VERSION }}-jre
 
-            # Diretorio de trabalho dentro do container
-            WORKDIR /app
+          # Diretório de trabalho dentro do container
+          WORKDIR /app
 
-            # Copia o JAR gerado pelo Maven para o container
-            COPY target/*.jar app.jar
+          # Copia o JAR gerado pelo Maven para o container
+          COPY target/*.jar app.jar
 
-            # Comando para rodar o JAR
-            ENTRYPOINT ["java", "-jar", "app.jar"]
-            EOF
-          else
-            echo "Arquivo Dockerfile ja existe. Pulando criacao."
-          fi
+          # Comando para rodar o JAR
+          ENTRYPOINT ["java", "-jar", "app.jar"]
+          EOF
 
       - name: Publicar no GitHub Packages (Maven)
         shell: bash
