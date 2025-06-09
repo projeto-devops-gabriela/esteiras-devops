@@ -84,9 +84,9 @@ jobs:
 
       - name: Build da imagem Docker
         shell: bash
-        run: docker build -t ghcr.io/${{ github.repository }}/demo-app:${{ env.DOCKER_IMAGE_TAG }} .
+        run: docker build -t ghcr.io/${{ github.repository }}/${{ github.repository }}:${{ env.DOCKER_IMAGE_TAG }} .
         working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Push da imagem Docker
         shell: bash
-        run: docker push ghcr.io/${{ github.repository }}/demo-app:${{ env.DOCKER_IMAGE_TAG }}
+        run: docker push ghcr.io/${{ github.repository }}/${{ github.repository }}:${{ env.DOCKER_IMAGE_TAG }}
