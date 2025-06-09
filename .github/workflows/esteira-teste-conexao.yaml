@@ -37,6 +37,15 @@ jobs:
           echo "SLN_PATH=$($sln.FullName)" >> $env:GITHUB_ENV
         shell: pwsh
 
+      # Cache Nuget
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.sln') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
       # Restore NuGet packages
       - name: Restore NuGet packages
         run: nuget restore "$env:SLN_PATH"
@@ -65,8 +74,8 @@ jobs:
             Write-Host "No test DLLs found"
           } else {
             foreach ($dll in $testDlls) {
-            Write-Host "Running tests in: $($dll.FullName)"
-            vstest.console.exe $dll.FullName --logger:trx
+              Write-Host "Running tests in: $($dll.FullName)"
+              vstest.console.exe $dll.FullName --logger:trx
             }
           }
 

@@ -1,0 +1,92 @@
+name: Deploy Java
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    env:
+      DOCKER_IMAGE_TAG: ${{ github.run_number }}-${{ github.sha }}
+
+    steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
+      - name: Localizar arquivo mvnw
+        id: find-mvnw
+        shell: bash
+        run: echo "MAVEN_DIR=$(dirname $(find . -name 'mvnw'))" >> $GITHUB_ENV
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ vars.JAVA_VERSION }}
+
+      - name: Permitir execucao do mvnw
+        shell: bash
+        run: chmod +x ./mvnw
+        working-directory: ${{ env.MAVEN_DIR }}
+
+      - name: Baixar artefato do build
+        uses: actions/download-artifact@v4
+        with:
+          name: demo-artifact
+          path: ${{ env.MAVEN_DIR }}/target
+
+      - name: Criar arquivo settings.xml
+        shell: bash
+        run: |
+          cat <<EOF > ${{ env.MAVEN_DIR }}/settings.xml
+          <settings>
+              <servers>
+                  <server>
+                      <id>github</id>
+                      <username>${{ github.actor }}</username>
+                      <password>${{ secrets.AUTHENTICATOR_G_TOKEN }}</password>
+                  </server>
+              </servers>
+          </settings>
+          EOF
+
+      - name: Criar arquivo Dockerfile
+        shell: bash
+        run: |
+          cat <<EOF > ${{ env.MAVEN_DIR }}/Dockerfile
+          # Use uma imagem base Java
+          FROM eclipse-temurin:${{ vars.JAVA_VERSION }}-jre
+
+          # Diretório de trabalho dentro do container
+          WORKDIR /app
+
+          # Copia o JAR gerado pelo Maven para o container
+          COPY target/*.jar app.jar
+
+          # Comando para rodar o JAR
+          ENTRYPOINT ["java", "-jar", "app.jar"]
+          EOF
+
+      - name: Publicar no GitHub Packages (Maven)
+        shell: bash
+        run: |
+          ./mvnw deploy -DskipTests --settings settings.xml \
+            -DaltDeploymentRepository=github::https://maven.pkg.github.com/${{ github.repository }}
+        working-directory: ${{ env.MAVEN_DIR }}
+        env:
+          AUTHENTICATOR_G_TOKEN: ${{ secrets.AUTHENTICATOR_G_TOKEN }}
+
+      - name: Login no GitHub Container Registry
+        shell: bash
+        run: echo "${{ secrets.AUTHENTICATOR_G_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build da imagem Docker
+        shell: bash
+        run: docker build -t ghcr.io/${{ github.repository }}/demo-app:${{ env.DOCKER_IMAGE_TAG }} .
+        working-directory: ${{ env.MAVEN_DIR }}
+
+      - name: Push da imagem Docker
+        shell: bash
+        run: docker push ghcr.io/${{ github.repository }}/demo-app:${{ env.DOCKER_IMAGE_TAG }}
