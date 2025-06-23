@@ -38,14 +38,23 @@ jobs:
         run: ./mvnw test clean verify org.jacoco:jacoco-maven-plugin:0.8.10:report
         working-directory: ${{ env.MAVEN_DIR }}
 
-      - name: Criar projeto no SonarCloud via API
+      - name: Verificar ou criar projeto no SonarCloud
         shell: bash
         run: |
-          curl -X POST "https://sonarcloud.io/api/projects/create" \
-            -u "${SONAR_TOKEN}:" \
-            -d "name=${{ github.repository_owner }}_${{ github.event.repository.name }}" \
-            -d "project=${{ github.repository_owner }}_${{ github.event.repository.name }}" \
-            -d "organization=${{ vars.ORGANIZATION_SONAR }}"
+          PROJECT_KEY="${{ github.repository_owner }}_${{ github.event.repository.name }}"
+          ORG="${{ vars.ORGANIZATION_SONAR }}"
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/projects/search?projects=${PROJECT_KEY}")
+
+          if [ "$RESPONSE" -eq 200 ]; then
+            echo "Projeto '$PROJECT_KEY' já existe no SonarCloud."
+          else
+            echo "Criando projeto '$PROJECT_KEY'..."
+            curl -s -X POST "https://sonarcloud.io/api/projects/create" \
+              -u "${SONAR_TOKEN}:" \
+              -d "name=$PROJECT_KEY" \
+              -d "project=$PROJECT_KEY" \
+              -d "organization=$ORG"
+          fi
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
