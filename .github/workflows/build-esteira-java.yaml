@@ -8,8 +8,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout codigo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Localizar arquivo mvnw
         id: find-mvnw
