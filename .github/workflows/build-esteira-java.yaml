@@ -17,10 +17,6 @@ jobs:
         shell: bash
         run: echo "MAVEN_DIR=$(dirname $(find . -name 'mvnw'))" >> $GITHUB_ENV
 
-      - name: Desfazer shallow clone
-        shell: bash
-        run: git fetch --unshallow
-
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
