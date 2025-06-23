@@ -38,16 +38,23 @@ jobs:
         run: ./mvnw test clean verify org.jacoco:jacoco-maven-plugin:0.8.10:report
         working-directory: ${{ env.MAVEN_DIR }}
 
+      - name: Instalar jq (Windows)
+        if: runner.os == 'Windows'
+        run: choco install jq -y
+        shell: powershell
+
       - name: Verificar ou criar projeto no SonarCloud
         shell: bash
         run: |
-          PROJECT_KEY="${{ github.repository_owner }}_${{ github.event.repository.name }}"
-          ORG="${{ vars.ORGANIZATION_SONAR }}"
-          
-          # Verifica existência do projeto
-          EXISTS=$(curl -s -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/projects/search?projects=$PROJECT_KEY" | grep -c "\"key\":\"$PROJECT_KEY\"")
+          PROJECT_KEY="projeto-devops-gabriela_projeto-teste-java"
+          ORG="projeto-devops-gabriela"
 
-          if [ "$EXISTS" -eq 0 ]; then
+          echo "Verificando existência do projeto '$PROJECT_KEY'..."
+
+          RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/projects/search?projects=$PROJECT_KEY")
+          COUNT=$(echo "$RESPONSE" | jq ".components | length")
+
+          if [ "$COUNT" -eq 0 ]; then
             echo "Criando projeto '$PROJECT_KEY'..."
             curl -s -X POST "https://sonarcloud.io/api/projects/create" \
               -u "${SONAR_TOKEN}:" \
