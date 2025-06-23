@@ -43,17 +43,19 @@ jobs:
         run: |
           PROJECT_KEY="${{ github.repository_owner }}_${{ github.event.repository.name }}"
           ORG="${{ vars.ORGANIZATION_SONAR }}"
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/projects/search?projects=${PROJECT_KEY}")
+          
+          # Verifica existência do projeto
+          EXISTS=$(curl -s -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/projects/search?projects=$PROJECT_KEY" | grep -c "\"key\":\"$PROJECT_KEY\"")
 
-          if [ "$RESPONSE" -eq 200 ]; then
-            echo "Projeto '$PROJECT_KEY' já existe no SonarCloud."
-          else
+          if [ "$EXISTS" -eq 0 ]; then
             echo "Criando projeto '$PROJECT_KEY'..."
             curl -s -X POST "https://sonarcloud.io/api/projects/create" \
               -u "${SONAR_TOKEN}:" \
               -d "name=$PROJECT_KEY" \
               -d "project=$PROJECT_KEY" \
               -d "organization=$ORG"
+          else
+            echo "Projeto '$PROJECT_KEY' já existe no SonarCloud."
           fi
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
