@@ -78,7 +78,7 @@ jobs:
             -Dsonar.qualitygate.wait=true \
             -Dsonar.tests=src/test/java/com/example/demo \
             -Dsonar.test.inclusions=**/*Test.java \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            -Dsonar.coverage.jacoco.xmlReportPaths=${{ env.MAVEN_DIR }}/target/site/jacoco/jacoco.xml \
             -Dsonar.verbose=true 
         working-directory: ${{ env.MAVEN_DIR }}
         env:
