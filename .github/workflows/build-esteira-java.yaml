@@ -33,9 +33,9 @@ jobs:
         run: ./mvnw clean install
         working-directory: ${{ env.MAVEN_DIR }}
 
-      - name: Executar testes
+      - name: Executar testes com cobertura
         shell: bash
-        run: ./mvnw test clean verify org.jacoco:jacoco-maven-plugin:0.8.10:report
+        run: ./mvnw clean verify
         working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Verificar se o relatório foi gerado
