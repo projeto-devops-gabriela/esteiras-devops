@@ -39,6 +39,7 @@ jobs:
         working-directory: ${{ env.MAVEN_DIR }}
 
       - name: Verificar se o relatório foi gerado
+        shell: bash
         run: |
           echo "Listando arquivos:"
           find ${{ env.MAVEN_DIR }}/target/site/jacoco -type f
